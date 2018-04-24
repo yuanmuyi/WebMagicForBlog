@@ -1,7 +1,5 @@
 package com.ccran.entity;
 
-import java.util.Date;
-
 /**
  * 
 * @ClassName: Author 
@@ -14,32 +12,49 @@ public class Author {
 	private int authorId;
 	private String authorName;
 	private String authorNickName;
-	private Date createDate;
+	private String createDate;
 	private int fans;
 	private int attention;
+	private String url;
+	private int flag;
 	
-	public int getUserId() {
+	public static final int FLAG_PART_1=1;
+	public static final int FLAG_PART_2=2;
+	
+	public Author(){}
+	public Author(Builder builder){
+		authorId=builder.authorId;
+		authorName=builder.authorName;
+		authorNickName=builder.authorNickName;
+		createDate=builder.createDate;
+		fans=builder.fans;
+		attention=builder.attention;
+		url=builder.url;
+		flag=builder.flag;
+	}
+	
+	public int getAuthorId() {
 		return authorId;
 	}
-	public void setUserId(int userId) {
-		this.authorId = userId;
+	public void setAuthorId(int authorId) {
+		this.authorId = authorId;
 	}
-	public String getUserName() {
+	public String getAuthorName() {
 		return authorName;
 	}
-	public void setUserName(String userName) {
-		this.authorName = userName;
+	public void setAuthorName(String authorName) {
+		this.authorName = authorName;
 	}
-	public String getUserNickName() {
+	public String getAuthorNickName() {
 		return authorNickName;
 	}
-	public void setUserNickName(String userNickName) {
-		this.authorNickName = userNickName;
+	public void setAuthorNickName(String authorNickName) {
+		this.authorNickName = authorNickName;
 	}
-	public Date getCreateDate() {
+	public String getCreateDate() {
 		return createDate;
 	}
-	public void setCreateDate(Date createDate) {
+	public void setCreateDate(String createDate) {
 		this.createDate = createDate;
 	}
 	public int getFans() {
@@ -53,5 +68,68 @@ public class Author {
 	}
 	public void setAttention(int attention) {
 		this.attention = attention;
+	}
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public int getFlag() {
+		return flag;
+	}
+	public void setFlag(int flag) {
+		this.flag = flag;
+	}
+	
+	//建造者
+	public static class Builder{
+		private final int flag;
+		
+		private int authorId;
+		private String authorName;
+		private String authorNickName;
+		private String createDate;
+		private int fans;
+		private int attention;
+		private String url;
+		
+		public Builder(int authorId,int flag){
+			this.authorId=authorId;
+			this.flag=flag;
+		}
+		
+		public Builder(String authorName,int flag){
+			this.authorName=authorName;
+			this.flag=flag;
+		}
+		
+		public Builder authorName(String val){
+			this.authorName=val; return this;
+		}
+		
+		public Builder authorNickName(String val){
+			this.authorNickName=val; return this;
+		}
+		
+		public Builder createDate(String val){
+			this.createDate=val; return this;
+		}
+		
+		public Builder fans(int val){
+			this.fans=val; return this;
+		}
+		
+		public Builder attention(int val){
+			this.attention=val; return this;
+		}
+		
+		public Builder url(String val){
+			this.url=val; return this;
+		}
+		
+		public Author build(){
+			return new Author(this);
+		}
 	}
 }
