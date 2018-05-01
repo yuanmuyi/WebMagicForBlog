@@ -2,13 +2,13 @@ package com.ccran.entity;
 
 /**
  * 
-* @ClassName: Author 
+* @ClassName: CnblogAuthor 
 * @Description: 作者信息实体
 * @author chenran
 * @date 2018年4月2日 上午11:49:35 
 * @version V1.0
  */
-public class Author {
+public class CnblogAuthor {
 	private int authorId;
 	private String authorName;
 	private String authorNickName;
@@ -21,8 +21,8 @@ public class Author {
 	public static final int FLAG_PART_1=1;
 	public static final int FLAG_PART_2=2;
 	
-	public Author(){}
-	public Author(Builder builder){
+	public CnblogAuthor(){}
+	public CnblogAuthor(Builder builder){
 		authorId=builder.authorId;
 		authorName=builder.authorName;
 		authorNickName=builder.authorNickName;
@@ -82,11 +82,16 @@ public class Author {
 		this.flag = flag;
 	}
 	
+	@Override
+	public String toString() {
+		return "博主ID:"+authorId+"博主账号名:"+authorName+"博主昵称:"+authorNickName+"账号创建日期:"+
+				createDate+"粉丝量:"+fans+"关注量:"+attention;
+	}
+	
 	//建造者
 	public static class Builder{
 		private final int flag;
-		
-		private int authorId;
+		private final int authorId;
 		private String authorName;
 		private String authorNickName;
 		private String createDate;
@@ -96,11 +101,6 @@ public class Author {
 		
 		public Builder(int authorId,int flag){
 			this.authorId=authorId;
-			this.flag=flag;
-		}
-		
-		public Builder(String authorName,int flag){
-			this.authorName=authorName;
 			this.flag=flag;
 		}
 		
@@ -128,8 +128,8 @@ public class Author {
 			this.url=val; return this;
 		}
 		
-		public Author build(){
-			return new Author(this);
+		public CnblogAuthor build(){
+			return new CnblogAuthor(this);
 		}
 	}
 }

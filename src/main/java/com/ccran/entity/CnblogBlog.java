@@ -10,7 +10,7 @@ import java.util.Date;
 * @date 2018年4月8日 上午10:39:06 
 * @version V1.0
  */
-public class Blog {
+public class CnblogBlog {
 	private int blogId;
 	private String title; 
 	private String type;
@@ -25,9 +25,9 @@ public class Blog {
 	public static final int FLAG_TYPE_TAG=2;
 	public static final int FLAG_READ_NUM=3;
 	
-	public Blog(){}
+	public CnblogBlog(){}
 	
-	public Blog(Builder build){
+	public CnblogBlog(Builder build){
 		blogId=build.blogId;
 		title=build.title;
 		type=build.type;
@@ -96,6 +96,12 @@ public class Blog {
 		this.flag = flag;
 	}
 	
+	@Override
+	public String toString() {
+		return "博客ID:"+blogId+"博客标题:"+title+"作者ID:"+authorId+"发布时间:"+publish+"阅读量:"+readNum
+				+"类型:"+type+"标签:"+tag;
+	}
+	
 	//建造者
 	public static class Builder{
 		//必要参数
@@ -143,8 +149,8 @@ public class Blog {
 			url=val; return this;
 		}
 		
-		public Blog build(){
-			return new Blog(this);
+		public CnblogBlog build(){
+			return new CnblogBlog(this);
 		}
 	}
 }

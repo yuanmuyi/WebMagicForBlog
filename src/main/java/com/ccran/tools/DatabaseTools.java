@@ -8,8 +8,8 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import com.ccran.entity.Author;
-import com.ccran.entity.Blog;
+import com.ccran.entity.CnblogAuthor;
+import com.ccran.entity.CnblogBlog;
 import com.ccran.processor.CnblogPageProcesser;
 
 /**
@@ -46,29 +46,77 @@ public class DatabaseTools {
 	
 	/**
 	 * 
-	* @Title: InsertIntoBlog 
+	* @Title: existCnblogBlogItem 
+	* @Description: 判断数据库表中是否存在博文Id为blogId的记录
+	* @param @param blogId
+	* @param @return
+	* @return boolean
+	* @version V1.0
+	 */
+	private static boolean existCnblogBlogItem(int blogId){
+		try{
+			PreparedStatement pps=con.prepareStatement("select * from cnblog_blog where blogId=?");
+			pps.setInt(1, blogId);
+			ResultSet rs=pps.executeQuery();
+			if(rs.next()){
+				return true;
+			}
+		}catch(Exception e){
+			logger.error(e);
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	* @Title: existCnblogAuthorItem 
+	* @Description: 判断数据库表cnblog_author表中是否存在博主Id为authorId的记录
+	* @param @param authorId
+	* @param @return
+	* @return boolean
+	* @version V1.0
+	 */
+	private static boolean existCnblogAuthorItem(int authorId){
+		try{
+			PreparedStatement pps=con.prepareStatement("select * from cnblog_author where authorId=?");
+			pps.setInt(1, authorId);
+			ResultSet rs=pps.executeQuery();
+			if(rs.next()){
+				return true;
+			}
+		}catch(Exception e){
+			logger.error(e);
+		}
+		return false;
+	}
+	
+	/**
+	 * 
+	* @Title: InsertIntoCnblogBlog 
 	* @Description: 通过博客对象插入博客表
 	* @param @param blog
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertIntoBlog(Blog blog){
+	public static void InsertIntoCnblogBlog(CnblogBlog blog){
 		switch(blog.getFlag()){
-		case Blog.FLAG_PART:
-			InsertIntoBlog(blog.getUrl(),blog.getBlogId(),blog.getTitle(),blog.getAuthorId(),blog.getPublish());
+		case CnblogBlog.FLAG_PART:
+			//不存在博文信息才可以完成插入
+			if(!DatabaseTools.existCnblogBlogItem(blog.getBlogId()))
+				InsertIntoCnblogBlog(blog.getUrl(),blog.getBlogId(),blog.getTitle(),blog.getAuthorId(),blog.getPublish());
 			break;
-		case Blog.FLAG_TYPE_TAG:
-			InsertTypeTagIntoBlog(blog.getBlogId(),blog.getType(),blog.getTag());
+		case CnblogBlog.FLAG_TYPE_TAG:
+			UpdateTypeTagInCnblogBlog(blog.getBlogId(),blog.getType(),blog.getTag());
 			break;
-		case Blog.FLAG_READ_NUM:
-			InsertReadNumIntoBlog(blog.getBlogId(),blog.getReadNum());
+		case CnblogBlog.FLAG_READ_NUM:
+			UpdateReadNumInCnblogBlog(blog.getBlogId(),blog.getReadNum());
 			break;
 		}
 	}
 	
 	/**
 	 * 
-	* @Title: InsertIntoBlog 
+	* @Title: InsertIntoCnblogBlog 
 	* @Description: 插入博客表
 	* @param @param blogId 博客Id
 	* @param @param title 博客题目
@@ -77,9 +125,9 @@ public class DatabaseTools {
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertIntoBlog(String urlStr,int blogId,String title,int authorId,String publish){
+	public static void InsertIntoCnblogBlog(String urlStr,int blogId,String title,int authorId,String publish){
 		try {
-			PreparedStatement pps=con.prepareStatement("insert into blog(blogId,title,authorId,publish,url) values(?,?,?,?,?)");
+			PreparedStatement pps=con.prepareStatement("insert into cnblog_blog(blogId,title,authorId,publish,url) values(?,?,?,?,?)");
 			pps.setInt(1, blogId);
 			pps.setString(2, title);
 			pps.setInt(3, authorId);
@@ -94,16 +142,16 @@ public class DatabaseTools {
 	
 	/**
 	 * 
-	* @Title: InsertReadNumIntoBlog 
+	* @Title: InsertReadNumIntoCnblogBlog 
 	* @Description: 设置阅读量
 	* @param @param blogId 博客Id
 	* @param @param readNum 阅读量
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertReadNumIntoBlog(int blogId,int readNum){
+	public static void UpdateReadNumInCnblogBlog(int blogId,int readNum){
 		try {
-			PreparedStatement pps=con.prepareStatement("update blog set readNum=? where blogId=?");
+			PreparedStatement pps=con.prepareStatement("update cnblog_blog set readNum=? where blogId=?");
 			pps.setInt(1, readNum);
 			pps.setInt(2, blogId);
 			pps.executeUpdate();
@@ -115,7 +163,7 @@ public class DatabaseTools {
 	
 	/**
 	 * 
-	* @Title: InsertTypeTagIntoBlog 
+	* @Title: InsertTypeTagIntoCnblogBlog 
 	* @Description: 设置博客类型以及标签
 	* @param @param blogId 博客Id
 	* @param @param type 博客类型
@@ -123,9 +171,9 @@ public class DatabaseTools {
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertTypeTagIntoBlog(int blogId,String type,String tag){
+	public static void UpdateTypeTagInCnblogBlog(int blogId,String type,String tag){
 		try {
-			PreparedStatement pps=con.prepareStatement("update blog set type=?,tag=? where blogId=?");
+			PreparedStatement pps=con.prepareStatement("update cnblog_blog set type=?,tag=? where blogId=?");
 			pps.setString(1, type);
 			pps.setString(2, tag);
 			pps.setInt(3, blogId);
@@ -138,35 +186,37 @@ public class DatabaseTools {
 	
 	/**
 	 * 
-	* @Title: InsertIntoAuthor 
+	* @Title: InsertIntoCnblogAuthor 
 	* @Description: 根据作者类插入数据库
 	* @param @param author
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertIntoAuthor(Author author){
+	public static void InsertIntoCnblogAuthor(CnblogAuthor author){
 		switch(author.getFlag()){
-		case Author.FLAG_PART_1:
-			InsertIntoAuthor(author.getAuthorId(), author.getAuthorName(), author.getUrl());
+		case CnblogAuthor.FLAG_PART_1:
+			//不存在作者信息才能插入
+			if(!DatabaseTools.existCnblogAuthorItem(author.getAuthorId()))
+				InsertIntoCnblogAuthor(author.getAuthorId(), author.getAuthorName(), author.getUrl());
 			break;
-		case Author.FLAG_PART_2:
-			InsertIntoAuthor(author.getAuthorName(), author.getAuthorNickName(), author.getCreateDate(), author.getFans(), author.getAttention());
+		case CnblogAuthor.FLAG_PART_2:
+			UpdateCnblogAuthor(author.getAuthorName(), author.getAuthorNickName(), author.getCreateDate(), author.getFans(), author.getAttention());
 			break;
 		}
 	}
 	
 	/**
 	 * 
-	* @Title: InsertIntoAuthor 
+	* @Title: InsertIntoCnblogAuthor 
 	* @Description: 插入作者表
 	* @param @param authorId 作者Id
 	* @param @param authorName 作者账号名
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertIntoAuthor(int authorId,String authorName,String urlStr){
+	public static void InsertIntoCnblogAuthor(int authorId,String authorName,String urlStr){
 		try {
-			PreparedStatement pps=con.prepareStatement("insert into author(authorId,authorName,url) values(?,?,?)");
+			PreparedStatement pps=con.prepareStatement("insert into cnblog_author(authorId,authorName,url) values(?,?,?)");
 			pps.setInt(1, authorId);
 			pps.setString(2, authorName);
 			pps.setString(3, urlStr);
@@ -179,7 +229,7 @@ public class DatabaseTools {
 	
 	/**
 	 * 
-	* @Title: InsertIntoAuthor 
+	* @Title: InsertIntoCnblogAuthor 
 	* @Description: TODO
 	* @param @param authorName
 	* @param @param authorNickName
@@ -189,9 +239,9 @@ public class DatabaseTools {
 	* @return void
 	* @version V1.0
 	 */
-	public static void InsertIntoAuthor(String authorName,String authorNickName,String createDate,int fans,int attention){
+	public static void UpdateCnblogAuthor(String authorName,String authorNickName,String createDate,int fans,int attention){
 		try {
-			PreparedStatement pps=con.prepareStatement("update author set authorNickName=?,createDate=?,fans=?,attention=? where authorName=?");
+			PreparedStatement pps=con.prepareStatement("update cnblog_author set authorNickName=?,createDate=?,fans=?,attention=? where authorName=?");
 			pps.setString(1, authorNickName);
 			pps.setString(2, createDate);
 			pps.setInt(3, fans);
@@ -202,5 +252,9 @@ public class DatabaseTools {
 		} catch (SQLException e) {
 			logger.error(e);
 		}		
+	}
+	
+	public static void main(String[] args) {
+		System.out.println(existCnblogAuthorItem(73901));
 	}
 }

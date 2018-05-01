@@ -1,7 +1,7 @@
 package com.ccran.pipeline;
 
-import com.ccran.entity.Author;
-import com.ccran.entity.Blog;
+import com.ccran.entity.CnblogAuthor;
+import com.ccran.entity.CnblogBlog;
 import com.ccran.tools.DatabaseTools;
 
 import us.codecraft.webmagic.ResultItems;
@@ -19,11 +19,13 @@ import us.codecraft.webmagic.pipeline.Pipeline;
 public class MySQLPipeLine implements Pipeline {
 
 	public void process(ResultItems resultItems, Task task) {
-		Blog blog=resultItems.get("blog");
-		Author author=resultItems.get("author");
-		if(author!=null)
-			DatabaseTools.InsertIntoAuthor(author);
-		if(blog!=null)
-			DatabaseTools.InsertIntoBlog(blog);
+		CnblogBlog blog=resultItems.get("cnblog_blog");
+		CnblogAuthor author=resultItems.get("cnblog_author");
+		if(author!=null){
+			DatabaseTools.InsertIntoCnblogAuthor(author);
+		}
+		if(blog!=null){
+			DatabaseTools.InsertIntoCnblogBlog(blog);
+		}
 	}
 }

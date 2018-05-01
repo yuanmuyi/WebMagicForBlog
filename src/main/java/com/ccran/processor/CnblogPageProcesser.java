@@ -1,13 +1,12 @@
 package com.ccran.processor;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
-import com.ccran.entity.Author;
-import com.ccran.entity.Blog;
+import com.ccran.entity.CnblogAuthor;
+import com.ccran.entity.CnblogBlog;
 import com.ccran.pipeline.MySQLPipeLine;
-import com.ccran.tools.DatabaseTools;
 
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
@@ -15,6 +14,7 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
 import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.scheduler.PriorityScheduler;
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.JsonPathSelector;
 
@@ -28,12 +28,16 @@ import us.codecraft.webmagic.selector.JsonPathSelector;
  */
 public class CnblogPageProcesser implements PageProcessor {
 	private static final String START_URL="https://www.cnblogs.com";
-	private static final String LINK_URL="(https://www.cnblogs.com/\\w+/p/\\w+.html)";
+	
+	private static final String LOW_LINK_URL="(https://www.cnblogs.com/[\\s\\S]+)";
+	private static final String MID_LINK_URL="(https://www.cnblogs.com/\\w+)";
+	private static final String HIGH_LINK_URL="(https://www.cnblogs.com/\\w+/p/\\w+.html)";
+	
 	private static final String BLOG_PAGE_URL="https://www.cnblogs.com/(\\w+)/p/(\\w+).html";
 	private static final String BLOG_TITLE_XPATH="//a[@id='cb_post_title_url']/text()";
 	private static final String AUTHOR_ID_REGEX="cb_blogId=(\\d+)";
 	private static final String BLOG_ID_REGEX="cb_entryId=(\\d+)";
-	private static final String DATE_XPATH="//div[@class='postDesc']/span[@id='post-date']/text()";
+	//private static final String DATE_XPATH="//div[@class='postDesc']/span[@id='post-date']/text()";
 	private static final String DATE_REGEX="cb_entryCreatedDate='(\\d+/\\d+/\\d+\\s\\d+:\\d+:\\d+)'";
 	private static final String READNUM_URL="https://www.cnblogs.com/mvc/blog/ViewCountCommentCout.aspx";
 	private static final String READNUM_REGEX="postId=(\\w+)";
@@ -44,18 +48,26 @@ public class CnblogPageProcesser implements PageProcessor {
 	private static final String AUTHOR_INFO_XPATH="//div[@id='profile_block']/a/text()";
 	private static final String AUTHOR_CREATE_DATE="入园时间：(\\d+-\\d+-\\d+)";
 	//重试次数、抓取间隔、编码方式
-	private Site site=Site.me().setRetryTimes(3).setSleepTime(1000)
+	private Site site=Site.me().setRetryTimes(3).setSleepTime(1000).setTimeOut(5000)
 			.setCharset("utf-8").setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
 	//作者去重
-	private Set<Integer> authorDuplicatedRemoval=new HashSet<Integer>();
-	private boolean isAuthorDuplicated(int authorId){
-		return !authorDuplicatedRemoval.add(authorId);
+	private Map<String,Integer> authorDuplicatedRemoval=new HashMap<String,Integer>();
+	private boolean isAuthorDuplicated(String authorName,int authorId){
+		boolean res=authorDuplicatedRemoval.containsKey(authorName);
+		authorDuplicatedRemoval.put(authorName, authorId);
+		return res;
+	}
+	private int getAuthorIdByName(String authorName){
+		return authorDuplicatedRemoval.get(authorName);
 	}
 	
 	//抽取逻辑
 	public void process(Page page) {
 		//增加爬取链接到队列，默认使用HashSetDuplicatedRemoval去重
-		page.addTargetRequests(page.getHtml().links().regex(LINK_URL).all());
+		page.addTargetRequests(page.getHtml().links().regex(MID_LINK_URL).all(),2);
+		page.addTargetRequests(page.getHtml().links().regex(HIGH_LINK_URL).all(),3);
+		//for(String url:page.getHtml().links().regex(LINK_URL).all())
+		//	System.out.println(url);
 		//博客基本信息
 		if(page.getUrl().regex(BLOG_PAGE_URL).match()){
 			crawlForBlog(page);
@@ -72,6 +84,7 @@ public class CnblogPageProcesser implements PageProcessor {
 		else if(page.getUrl().regex(AUTHOR_INFO_URL).match()){
 			crawlForAuthor(page);
 		}
+		//不进行pipeline的处理
 		else{
 			page.setSkip(true);
 		}
@@ -95,19 +108,19 @@ public class CnblogPageProcesser implements PageProcessor {
 		int blogId=Integer.parseInt(html.regex(BLOG_ID_REGEX, 1).toString());
 		String dateStr=html.regex(DATE_REGEX,1).toString();
 		//AJAX，构造URL获取：阅读量，类型标签，作者信息
-		page.addTargetRequest(READNUM_URL+"?postId="+blogId);
-		page.addTargetRequest(TYPE_TAG_URL+"?blogApp="+authorName+"&blogId="+authorId+"&postId="+blogId);
-		//作者信息
-		if(!isAuthorDuplicated(authorId)){
-			Author author=new Author.Builder(authorId, Author.FLAG_PART_1).authorName(authorName)
+		page.addTargetRequest(new Request(READNUM_URL+"?postId="+blogId).setPriority(5));
+		page.addTargetRequest(new Request(TYPE_TAG_URL+"?blogApp="+authorName+"&blogId="+authorId+"&postId="+blogId).setPriority(5));
+		//作者信息封装成对象交由pipeline处理
+		if(!isAuthorDuplicated(authorName,authorId)){
+			CnblogAuthor author=new CnblogAuthor.Builder(authorId, CnblogAuthor.FLAG_PART_1).authorName(authorName)
 					.url(START_URL+"/"+authorName).build();
-			page.putField("author", author);
-			page.addTargetRequest(AUTHOR_INFO_URL+"?blogApp="+authorName);		
+			page.putField("cnblog_author", author);
+			page.addTargetRequest(new Request(AUTHOR_INFO_URL+"?blogApp="+authorName).setPriority(10));		
 		}
-		//博客表信息
-		Blog blog=new Blog.Builder(blogId, Blog.FLAG_PART).url(urlStr).title(title)
+		//博客信息封装成对象交由pipeline处理
+		CnblogBlog blog=new CnblogBlog.Builder(blogId, CnblogBlog.FLAG_PART).url(urlStr).title(title)
 				.authorId(authorId).publish(dateStr).build();
-		page.putField("blog", blog);
+		page.putField("cnblog_blog", blog);
 	}
 	
 	/**
@@ -119,10 +132,12 @@ public class CnblogPageProcesser implements PageProcessor {
 	* @version V1.0
 	 */
 	public void crawlForReadNum(Page page){
+		//xpath、regex提取阅读量
 		int readNum=Integer.parseInt(page.getHtml().xpath("//body/text()").toString());
 		int blogId=Integer.parseInt(page.getUrl().regex(READNUM_REGEX,1).toString());
-		Blog blog=new Blog.Builder(blogId, Blog.FLAG_READ_NUM).readNum(readNum).build();
-		page.putField("blog", blog);
+		//封装成对象交由pipeline处理
+		CnblogBlog blog=new CnblogBlog.Builder(blogId, CnblogBlog.FLAG_READ_NUM).readNum(readNum).build();
+		page.putField("cnblog_blog", blog);
 	}
 	
 	/**
@@ -134,14 +149,13 @@ public class CnblogPageProcesser implements PageProcessor {
 	* @version V1.0
 	 */
 	public void crawlForBlogTypeTag(Page page){
+		//提取Json信息
 		int blogId=Integer.parseInt(page.getUrl().regex(TYPE_TAG_REGEX,1).toString());
 		List<String> cateList=new JsonPathSelector("$.Categories").selectList(page.getRawText());
 		List<String> tagList=new JsonPathSelector("$.Tags").selectList(page.getRawText());
 		cateList=Html.create(cateList.get(0)).xpath("//a/text()").all();
 		tagList=Html.create(tagList.get(0)).xpath("//a/text()").all();
-		/**
-		 * 作为字符串插入数据库
-		 */
+		//类别、标签组合成串
 		StringBuilder sbCateList=new StringBuilder("");
 		for(int i=0;i<cateList.size();i++){
 			if(i!=0)
@@ -154,9 +168,10 @@ public class CnblogPageProcesser implements PageProcessor {
 				sbTagList.append(',');
 			sbTagList.append(tagList.get(i));
 		}
-		Blog blog=new Blog.Builder(blogId, Blog.FLAG_TYPE_TAG).type(sbCateList.toString())
+		//封装成对象交由pipeline处理
+		CnblogBlog blog=new CnblogBlog.Builder(blogId, CnblogBlog.FLAG_TYPE_TAG).type(sbCateList.toString())
 				.tag(sbTagList.toString()).build();
-		page.putField("blog", blog);
+		page.putField("cnblog_blog", blog);
 	}
 	
 	/**
@@ -168,16 +183,21 @@ public class CnblogPageProcesser implements PageProcessor {
 	* @version V1.0
 	 */
 	public void crawlForAuthor(Page page){
+		//xpath、regex获取作者基本信息
 		String authorName=page.getUrl().regex(AUTHOR_INFO_REGEX,1).toString();
+		//通过Map获取ID
+		int authorId=getAuthorIdByName(authorName);
+		//内容解析
 		List<String> authorInfo=page.getHtml().xpath(AUTHOR_INFO_XPATH).all();
 		String createDateStr=page.getHtml().regex(AUTHOR_CREATE_DATE,1).toString();
 		String authorNickName=authorInfo.get(0);
 		int fans=Integer.parseInt(authorInfo.get(authorInfo.size()-2));
 		int attention=Integer.parseInt(authorInfo.get(authorInfo.size()-1));
-		
-		Author author=new Author.Builder(authorName, Author.FLAG_PART_2).authorNickName(authorNickName)
-				.createDate(createDateStr).fans(fans).attention(attention).build();
-		page.putField("author", author);
+		//封装成对象交由pipeline处理
+		CnblogAuthor author=new CnblogAuthor.Builder(authorId, CnblogAuthor.FLAG_PART_2).authorName(authorName)
+				.authorNickName(authorNickName).createDate(createDateStr)
+				.fans(fans).attention(attention).build();
+		page.putField("cnblog_author", author);
 	}
 
 	public Site getSite() {
@@ -185,7 +205,7 @@ public class CnblogPageProcesser implements PageProcessor {
 	}
 
 	public static void main(String[] args) {
-		Spider.create(new CnblogPageProcesser())
+		Spider.create(new CnblogPageProcesser()).setScheduler(new PriorityScheduler())
 		.addUrl(START_URL).addPipeline(new ConsolePipeline()).addPipeline(new MySQLPipeLine())
 		.run();
 	}
