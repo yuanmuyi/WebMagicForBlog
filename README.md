@@ -1,2 +1,3 @@
 # WebMagicForBlog
-WebMagic对博客站爬取
+WebMagic爬取博客站，当前实现对博客园爬取
+<hr/>

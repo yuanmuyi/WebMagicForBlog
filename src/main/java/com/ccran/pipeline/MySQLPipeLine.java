@@ -2,7 +2,7 @@ package com.ccran.pipeline;
 
 import com.ccran.entity.CnblogAuthor;
 import com.ccran.entity.CnblogBlog;
-import com.ccran.tools.DatabaseTools;
+import com.ccran.tools.DatabaseTool;
 
 import us.codecraft.webmagic.ResultItems;
 import us.codecraft.webmagic.Task;
@@ -22,10 +22,10 @@ public class MySQLPipeLine implements Pipeline {
 		CnblogBlog blog=resultItems.get("cnblog_blog");
 		CnblogAuthor author=resultItems.get("cnblog_author");
 		if(author!=null){
-			DatabaseTools.InsertIntoCnblogAuthor(author);
+			DatabaseTool.InsertIntoCnblogAuthor(author);
 		}
 		if(blog!=null){
-			DatabaseTools.InsertIntoCnblogBlog(blog);
+			DatabaseTool.InsertIntoCnblogBlog(blog);
 		}
 	}
 }

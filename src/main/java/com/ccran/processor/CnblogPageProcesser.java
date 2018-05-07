@@ -6,15 +6,11 @@ import java.util.Map;
 
 import com.ccran.entity.CnblogAuthor;
 import com.ccran.entity.CnblogBlog;
-import com.ccran.pipeline.MySQLPipeLine;
 
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.Spider;
-import us.codecraft.webmagic.pipeline.ConsolePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
-import us.codecraft.webmagic.scheduler.PriorityScheduler;
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.JsonPathSelector;
 
@@ -50,7 +46,7 @@ public class CnblogPageProcesser implements PageProcessor {
 	//重试次数、抓取间隔、编码方式
 	private Site site=Site.me().setRetryTimes(3).setSleepTime(1000).setTimeOut(5000)
 			.setCharset("utf-8").setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
-	//作者去重
+	//作者去重，同时进行博主账号名-博主ID的映射
 	private Map<String,Integer> authorDuplicatedRemoval=new HashMap<String,Integer>();
 	private boolean isAuthorDuplicated(String authorName,int authorId){
 		boolean res=authorDuplicatedRemoval.containsKey(authorName);
@@ -64,8 +60,9 @@ public class CnblogPageProcesser implements PageProcessor {
 	//抽取逻辑
 	public void process(Page page) {
 		//增加爬取链接到队列，默认使用HashSetDuplicatedRemoval去重
-		page.addTargetRequests(page.getHtml().links().regex(MID_LINK_URL).all(),2);
 		page.addTargetRequests(page.getHtml().links().regex(HIGH_LINK_URL).all(),3);
+		page.addTargetRequests(page.getHtml().links().regex(MID_LINK_URL).all(),2);
+		page.addTargetRequests(page.getHtml().links().regex(LOW_LINK_URL).all(),1);
 		//for(String url:page.getHtml().links().regex(LINK_URL).all())
 		//	System.out.println(url);
 		//博客基本信息
@@ -203,10 +200,8 @@ public class CnblogPageProcesser implements PageProcessor {
 	public Site getSite() {
 		return site;
 	}
-
-	public static void main(String[] args) {
-		Spider.create(new CnblogPageProcesser()).setScheduler(new PriorityScheduler())
-		.addUrl(START_URL).addPipeline(new ConsolePipeline()).addPipeline(new MySQLPipeLine())
-		.run();
+	
+	public void setSite(Site site){
+		this.site=site;
 	}
 }

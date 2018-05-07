@@ -20,11 +20,11 @@ import com.ccran.processor.CnblogPageProcesser;
 * @date 2018年4月10日 上午11:08:58 
 * @version V1.0
  */
-public class DatabaseTools {
+public class DatabaseTool {
 	/**
 	 * @param args
 	 */
-	private static Logger logger=Logger.getLogger(DatabaseTools.class);
+	private static Logger logger=Logger.getLogger(DatabaseTool.class);
 	//驱动程序
 	public static final String DBDRIVER = "com.mysql.cj.jdbc.Driver";
 	//连接地址是由各个数据库生产商单独提供的，所以需要单独记住
@@ -102,7 +102,7 @@ public class DatabaseTools {
 		switch(blog.getFlag()){
 		case CnblogBlog.FLAG_PART:
 			//不存在博文信息才可以完成插入
-			if(!DatabaseTools.existCnblogBlogItem(blog.getBlogId()))
+			if(!DatabaseTool.existCnblogBlogItem(blog.getBlogId()))
 				InsertIntoCnblogBlog(blog.getUrl(),blog.getBlogId(),blog.getTitle(),blog.getAuthorId(),blog.getPublish());
 			break;
 		case CnblogBlog.FLAG_TYPE_TAG:
@@ -196,7 +196,7 @@ public class DatabaseTools {
 		switch(author.getFlag()){
 		case CnblogAuthor.FLAG_PART_1:
 			//不存在作者信息才能插入
-			if(!DatabaseTools.existCnblogAuthorItem(author.getAuthorId()))
+			if(!DatabaseTool.existCnblogAuthorItem(author.getAuthorId()))
 				InsertIntoCnblogAuthor(author.getAuthorId(), author.getAuthorName(), author.getUrl());
 			break;
 		case CnblogAuthor.FLAG_PART_2:
