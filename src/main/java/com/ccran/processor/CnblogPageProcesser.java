@@ -9,8 +9,6 @@ import com.ccran.entity.CnblogBlog;
 
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Request;
-import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.selector.Html;
 import us.codecraft.webmagic.selector.JsonPathSelector;
 
@@ -22,7 +20,7 @@ import us.codecraft.webmagic.selector.JsonPathSelector;
 * @date 2018年4月7日 下午4:24:10 
 * @version V1.0
  */
-public class CnblogPageProcesser implements PageProcessor {
+public class CnblogPageProcesser extends BasePageProcessor {
 	private static final String START_URL="https://www.cnblogs.com";
 	
 	private static final String LOW_LINK_URL="(https://www.cnblogs.com/[\\s\\S]+)";
@@ -43,9 +41,11 @@ public class CnblogPageProcesser implements PageProcessor {
 	private static final String AUTHOR_INFO_REGEX="blogApp=(\\w+)";
 	private static final String AUTHOR_INFO_XPATH="//div[@id='profile_block']/a/text()";
 	private static final String AUTHOR_CREATE_DATE="入园时间：(\\d+-\\d+-\\d+)";
-	//重试次数、抓取间隔、编码方式
-	private Site site=Site.me().setRetryTimes(3).setSleepTime(1000).setTimeOut(5000)
-			.setCharset("utf-8").setUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
+
+	public CnblogPageProcesser(String path){
+		super(path);
+	}
+	
 	//作者去重，同时进行博主账号名-博主ID的映射
 	private Map<String,Integer> authorDuplicatedRemoval=new HashMap<String,Integer>();
 	private boolean isAuthorDuplicated(String authorName,int authorId){
@@ -195,13 +195,5 @@ public class CnblogPageProcesser implements PageProcessor {
 				.authorNickName(authorNickName).createDate(createDateStr)
 				.fans(fans).attention(attention).build();
 		page.putField("cnblog_author", author);
-	}
-
-	public Site getSite() {
-		return site;
-	}
-	
-	public void setSite(Site site){
-		this.site=site;
 	}
 }

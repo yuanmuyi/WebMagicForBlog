@@ -1,7 +1,9 @@
 package com.ccran.entity;
 
-import java.io.Serializable;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+import us.codecraft.webmagic.Site;
 
 /**
  * 
@@ -12,6 +14,8 @@ import java.util.List;
 * @version V1.0
  */
 public class SiteFromJson{
+	private static Logger logger=Logger.getLogger(SiteFromJson.class);
+	
 	private int retryTimes;
 	private int minSleepTime;
 	private int maxSleepTime;
@@ -78,5 +82,34 @@ public class SiteFromJson{
 	public String getRandomUserAgent(){
 		int randomIndex=(int) (Math.random()*userAgent.size());
 		return userAgent.get(randomIndex);
+	}
+	
+	/**
+	 * 
+	 * @Title: getSite
+	 * @Description: 通过SiteFromJson配置Site
+	 * @param @param
+	 *            jsonSite
+	 * @param @return
+	 * @return Site
+	 * @version V1.0
+	 */
+	public static Site getSite(SiteFromJson jsonSite) {
+		Site site = null;
+		if (jsonSite == null) {
+			site = Site.me().setRetryTimes(3).setSleepTime(1000).setTimeOut(5000).setCharset("utf-8").setUserAgent(
+					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36");
+			return site;
+		}
+		int retryTimes = jsonSite.getRetryTimes();
+		int randomSleepTime = jsonSite.getRandomSleepTime();
+		int timeOut = jsonSite.getTimeOut();
+		String charset = jsonSite.getCharset();
+		String randomUserAgent = jsonSite.getRandomUserAgent();
+		logger.info("重试次数:"+retryTimes + "抓取间隔:" + randomSleepTime 
+				+ "超时时间:" + timeOut + "解析编码:" + charset + "UserAgent:" + randomUserAgent);
+		site = Site.me().setRetryTimes(retryTimes).setSleepTime(randomSleepTime).setTimeOut(timeOut).setCharset(charset)
+				.setUserAgent(randomUserAgent);
+		return site;
 	}
 }
