@@ -14,8 +14,6 @@ import us.codecraft.webmagic.Site;
 * @version V1.0
  */
 public class SiteFromJson{
-	private static Logger logger=Logger.getLogger(SiteFromJson.class);
-	
 	private int retryTimes;
 	private int minSleepTime;
 	private int maxSleepTime;
@@ -67,7 +65,7 @@ public class SiteFromJson{
 	* @return int
 	* @version V1.0
 	 */
-	public int getRandomSleepTime(){
+	private int getRandomSleepTime(){
 		return (int) (minSleepTime+Math.random()*maxSleepTime);
 	}
 	
@@ -79,7 +77,7 @@ public class SiteFromJson{
 	* @return String
 	* @version V1.0
 	 */
-	public String getRandomUserAgent(){
+	private String getRandomUserAgent(){
 		int randomIndex=(int) (Math.random()*userAgent.size());
 		return userAgent.get(randomIndex);
 	}
@@ -106,7 +104,7 @@ public class SiteFromJson{
 		int timeOut = jsonSite.getTimeOut();
 		String charset = jsonSite.getCharset();
 		String randomUserAgent = jsonSite.getRandomUserAgent();
-		logger.info("重试次数:"+retryTimes + "抓取间隔:" + randomSleepTime 
+		System.out.println("重试次数:"+retryTimes + "抓取间隔:" + randomSleepTime 
 				+ "超时时间:" + timeOut + "解析编码:" + charset + "UserAgent:" + randomUserAgent);
 		site = Site.me().setRetryTimes(retryTimes).setSleepTime(randomSleepTime).setTimeOut(timeOut).setCharset(charset)
 				.setUserAgent(randomUserAgent);

@@ -26,7 +26,8 @@ public class DatabaseTool {
 	 */
 	private static Logger logger=Logger.getLogger(DatabaseTool.class);
 	//驱动程序
-	public static final String DBDRIVER = "com.mysql.cj.jdbc.Driver";
+	//6.0以上驱动名称
+	public static final String DBDRIVER = "com.mysql.jdbc.Driver";
 	//连接地址是由各个数据库生产商单独提供的，所以需要单独记住
 	public static final String DBURL = "jdbc:mysql://localhost:3306/blog?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC";
 	//连接数据库的用户名
@@ -102,9 +103,9 @@ public class DatabaseTool {
 		switch(blog.getFlag()){
 		case CnblogBlog.FLAG_PART:
 			//不存在博文信息才可以完成插入
-			if(!DatabaseTool.existCnblogBlogItem(blog.getBlogId()))
+			if(!DatabaseTool.existCnblogBlogItem(blog.getBlogId())){
 				InsertIntoCnblogBlog(blog.getUrl(),blog.getBlogId(),blog.getTitle(),blog.getAuthorId(),blog.getPublish());
-			break;
+			}break;
 		case CnblogBlog.FLAG_TYPE_TAG:
 			UpdateTypeTagInCnblogBlog(blog.getBlogId(),blog.getType(),blog.getTag());
 			break;
@@ -196,9 +197,9 @@ public class DatabaseTool {
 		switch(author.getFlag()){
 		case CnblogAuthor.FLAG_PART_1:
 			//不存在作者信息才能插入
-			if(!DatabaseTool.existCnblogAuthorItem(author.getAuthorId()))
+			if(!DatabaseTool.existCnblogAuthorItem(author.getAuthorId())){
 				InsertIntoCnblogAuthor(author.getAuthorId(), author.getAuthorName(), author.getUrl());
-			break;
+			}break;
 		case CnblogAuthor.FLAG_PART_2:
 			UpdateCnblogAuthor(author.getAuthorName(), author.getAuthorNickName(), author.getCreateDate(), author.getFans(), author.getAttention());
 			break;
@@ -254,7 +255,8 @@ public class DatabaseTool {
 		}		
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(existCnblogAuthorItem(73901));
+	public static void main(String[] args) throws Exception{
+		Thread.sleep(5000);
+		InsertIntoCnblogAuthor(1, "ccran", "www.baidu.com");
 	}
 }

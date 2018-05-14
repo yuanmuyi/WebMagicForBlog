@@ -1,6 +1,7 @@
 package com.ccran.application;
 
 import com.ccran.pipeline.MySQLPipeLine;
+import com.ccran.processor.CSDNPageProcessor;
 import com.ccran.processor.CnblogPageProcesser;
 import com.ccran.processor.IPProxyProcessor;
 import com.ccran.tools.LoadJsonTool;
@@ -12,11 +13,13 @@ import us.codecraft.webmagic.scheduler.PriorityScheduler;
 
 public class RunSpider {
 	private static final String CNBLOGS_START_URL="https://www.cnblogs.com";
+	private static final String CSDN_START_URL="https://blog.csdn.net/u014077947/article/details/79939473";
 	private static final String XICI_IP_PROXY_URL="http://www.xicidaili.com/";
 	
 	public static void main(String[] args) {
-		//RunCnblogSpider();
-		RunIPProxySpider();
+		RunCnblogSpider();
+		//RunIPProxySpider();
+		//RunCSDNSpider();
 	}
 
 	/**
@@ -50,6 +53,11 @@ public class RunSpider {
 	public static void RunIPProxySpider(){
 		Spider.create(new IPProxyProcessor("site.json")).addUrl(XICI_IP_PROXY_URL)
 		.addPipeline(new ConsolePipeline()).run();
-		System.out.println("hello world");
+	}
+	
+	public static void RunCSDNSpider(){
+		Spider.create(new CSDNPageProcessor("site.json"))
+		.addUrl(CSDN_START_URL)
+		.addPipeline(new ConsolePipeline()).run();
 	}
 }

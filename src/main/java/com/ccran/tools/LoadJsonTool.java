@@ -1,5 +1,6 @@
 package com.ccran.tools;
 
+import java.io.File;
 import java.io.FileReader;
 
 import org.apache.log4j.Logger;
@@ -33,7 +34,13 @@ public class LoadJsonTool {
 	public static SiteFromJson getSiteFromJson(String jsonPath) {
 		try {
 			// 通过fastjson反序列化SiteFromJson
-			JSONReader jsonReader = new JSONReader(new FileReader(jsonPath));
+			//对site.json文件获取
+			File file=new File("src/main/conf/"+jsonPath);
+			if(!file.exists())
+				file=new File(jsonPath);
+			FileReader fileReader=new FileReader(file);
+			JSONReader jsonReader = new JSONReader(fileReader);
+			
 			jsonReader.startArray();
 			if (jsonReader.hasNext()) {
 				/**
