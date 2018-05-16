@@ -5,12 +5,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.ccran.entity.CSDNAuthor;
+import com.ccran.entity.CSDNBlog;
 import com.ccran.entity.CnblogAuthor;
 import com.ccran.entity.CnblogBlog;
-import com.ccran.processor.CnblogPageProcesser;
+import com.ccran.entity.IPProxyItem;
 
 /**
  * 
@@ -40,6 +44,80 @@ public class DatabaseTool {
 		try{
 			Class.forName(DBDRIVER); //1、使用CLASS 类加载驱动程序
 			con = DriverManager.getConnection(DBURL,DBUSER,DBPASS); //2、连接数据库
+		}catch(Exception e){
+			logger.error(e);
+		}
+	}
+	
+	/**
+	 * 
+	* @Title: getCSDNAuthorIdByName 
+	* @Description: 根据CSDN博主名称获取ID
+	* @param @param authorName
+	* @param @return
+	* @return int
+	* @version V1.0
+	 */
+	public static int getCSDNAuthorIdByName(String authorName){
+		try{
+			PreparedStatement pps=con.prepareStatement("select authorId from csdn_author where authorName=?");
+			pps.setString(1, authorName);
+			ResultSet rs=pps.executeQuery();
+			if(rs.next()){
+				return rs.getInt(1);
+			}
+		}catch(Exception e){
+			logger.error(e);
+		}
+		return -1;
+	}
+	
+	/**
+	 * 
+	* @Title: InsertIntoCSDNAuthor 
+	* @Description: 插入CSDN博主表
+	* @param @param author
+	* @return void
+	* @version V1.0
+	 */
+	public static void InsertIntoCSDNAuthor(CSDNAuthor author){
+		try{
+			PreparedStatement pps=con.prepareStatement("insert into csdn_author(authorName,blogNum,fansNum,likeNum,commentNum,levelNum,visitNum,integral,rank) values(?,?,?,?,?,?,?,?,?)");
+			pps.setString(1, author.getAuthorName());
+			pps.setInt(2, author.getBlogNum());
+			pps.setInt(3, author.getFansNum());
+			pps.setInt(4, author.getLikeNum());
+			pps.setInt(5, author.getCommentNum());
+			pps.setInt(6, author.getLevelNum());
+			pps.setInt(7, author.getVisitNum());
+			pps.setInt(8, author.getIntegral());
+			pps.setInt(9, author.getRank());
+			pps.executeUpdate();
+			pps.close();
+		}catch(Exception e){
+			logger.error(e);
+		}
+	}
+	
+	/**
+	 * 
+	* @Title: InsertIntoCSDNBlog 
+	* @Description: 插入CSDN博文表
+	* @param @param blog
+	* @return void
+	* @version V1.0
+	 */
+	public static void InsertIntoCSDNBlog(CSDNBlog blog){
+		try{
+			PreparedStatement pps=con.prepareStatement("insert into csdn_blog(blogId,title,readNum,publishTime,tag,authorId) values(?,?,?,?,?,?)");
+			pps.setInt(1, blog.getBlogId());
+			pps.setString(2, blog.getTitle());
+			pps.setInt(3, blog.getReadNum());
+			pps.setString(4, blog.getPublishTime());
+			pps.setString(5, blog.getTag());
+			pps.setInt(6, blog.getAuthorId());
+			pps.executeUpdate();
+			pps.close();
 		}catch(Exception e){
 			logger.error(e);
 		}
@@ -255,8 +333,75 @@ public class DatabaseTool {
 		}		
 	}
 	
+	/**
+	 * 
+	* @Title: InsertIntoIPProxy 
+	* @Description: 插入IP代理记录进数据库
+	* @param @param item
+	* @return void
+	* @version V1.0
+	 */
+	public static void InsertIntoIPProxy(IPProxyItem item){
+		try{
+			PreparedStatement pps=con.prepareStatement("insert into ipproxy(ipAddress,port,serverLocate,anonymity,type) values(?,?,?,?,?)");
+			pps.setString(1, item.getIpAddress());
+			pps.setInt(2, item.getPort());
+			pps.setString(3, item.getServerLocate());
+			pps.setInt(4,item.getAnonymity());
+			pps.setString(5, item.getType());
+			pps.executeUpdate();
+			pps.close();
+		}catch(Exception e){
+			logger.error(e);
+		}
+	}
+	
+	/**
+	 * 
+	* @Title: getIPProxyItemList 
+	* @Description: TODO
+	* @param @return
+	* @return List<IPProxyItem>
+	* @version V1.0
+	 */
+	public static List<IPProxyItem> getIPProxyItemList(){
+		List<IPProxyItem> result=new ArrayList<IPProxyItem>();
+		try{
+			PreparedStatement pps=con.prepareStatement("select * from ipproxy");
+			ResultSet resultSet=pps.executeQuery();
+			while(resultSet.next()){
+				String ipAddress=resultSet.getString(2);
+				int port=resultSet.getInt(3);
+				String serverLocate=resultSet.getString(4);
+				int anonymity=resultSet.getInt(5);
+				String type=resultSet.getString(6);
+				IPProxyItem item=new IPProxyItem(ipAddress, port, serverLocate, anonymity, type);
+				result.add(item);
+			}
+		}catch(Exception e){
+			logger.error(e);
+		}
+		return result;
+	}
+	
+	/**
+	 * 
+	* @Title: clearIPProxyTable 
+	* @Description: 清空IPProxy表
+	* @param 
+	* @return void
+	* @version V1.0
+	 */
+	public static void clearIPProxyTable(){
+		try{
+			PreparedStatement pps=con.prepareStatement("delete from ipproxy");
+			pps.executeUpdate();
+		}catch(Exception e){
+			logger.error(e);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception{
-		Thread.sleep(5000);
-		InsertIntoCnblogAuthor(1, "ccran", "www.baidu.com");
+		clearIPProxyTable();
 	}
 }

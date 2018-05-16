@@ -45,11 +45,11 @@ public class IPProxyItem {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public String getServerAddress() {
+	public String getServerLocate() {
 		return serverLocate;
 	}
-	public void setServerAddress(String serverAddress) {
-		this.serverLocate = serverAddress;
+	public void setServerLocate(String serverLocate) {
+		this.serverLocate = serverLocate;
 	}
 	public int getAnonymity() {
 		return anonymity;

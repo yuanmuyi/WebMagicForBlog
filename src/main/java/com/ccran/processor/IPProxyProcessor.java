@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ccran.entity.IPProxyItem;
+import com.ccran.tools.DatabaseTool;
 import com.ccran.tools.LoadJsonTool;
 
 import us.codecraft.webmagic.Page;
@@ -22,18 +23,12 @@ import us.codecraft.webmagic.selector.Selectable;
 * @version V1.0
  */
 public class IPProxyProcessor extends BasePageProcessor {
-	public static List<IPProxyItem> mIPProxyItemList;
-	static{
-		mIPProxyItemList=new ArrayList<IPProxyItem>();
-	}
-	
+
 	public IPProxyProcessor(String path){
 		super(path);
 	}
 	
 	public void process(Page page) {
-		//清空IP列表
-		mIPProxyItemList.clear();
 		//进行信息提取
 		List<Selectable> sel=page.getHtml().xpath("//table[@id='ip_list']/tbody/tr[@class]").nodes();
 		for(Selectable s:sel){
@@ -50,8 +45,7 @@ public class IPProxyProcessor extends BasePageProcessor {
 				anonymity=IPProxyItem.CLARITY;
 			String type=items.get(5);
 			IPProxyItem item=new IPProxyItem(ipAddress, port, serverLocate, anonymity, type);
-			System.out.println(item);
-			mIPProxyItemList.add(item);
+			DatabaseTool.InsertIntoIPProxy(item);
 		}
 	}
 }

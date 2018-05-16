@@ -1,7 +1,7 @@
 [{
 	"retryTimes":3,
-	"minSleepTime":1000,
-	"maxSleepTime":3000,
+	"minSleepTime":500,
+	"maxSleepTime":1000,
 	"timeOut":5000,
 	"charset":"utf-8",
 	"userAgent":[
