@@ -33,21 +33,15 @@ public class LoadJsonTool {
 	 */
 	public static SiteFromJson getSiteFromJson(String jsonPath) {
 		try {
-			// 通过fastjson反序列化SiteFromJson
 			//对site.json文件获取
 			File file=new File("src/main/conf/"+jsonPath);
 			if(!file.exists())
 				file=new File(jsonPath);
 			FileReader fileReader=new FileReader(file);
+			// 通过fastjson反序列化SiteFromJson
 			JSONReader jsonReader = new JSONReader(fileReader);
-			
 			jsonReader.startArray();
 			if (jsonReader.hasNext()) {
-				/**
-				 * 逐一读取解析 String key=jsonReader.readString(); String
-				 * value=jsonReader.readString();
-				 * System.out.println(key+":"+value);
-				 */
 				// 直接通过bean进行解析
 				jsonSite = jsonReader.readObject(SiteFromJson.class);
 			}

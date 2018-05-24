@@ -1,0 +1,59 @@
+#创建blog数据库
+create database blog;
+use blog;
+#创建cnblogs博主表
+create table if not exists cnblog_author(
+	authorId int(11) not null,
+	authorName varchar(255),
+	authorNickName varchar(255),
+	createDate datetime,
+	fans int(11),
+	attention int(11),
+	url varchar(255),
+	primary key(authorId)
+)engine=InnoDB default charset=utf8;
+#创建cnblogs博客表
+create table if not exists cnblog_blog(
+	blogId int(11) not null,
+	title varchar(255),
+	type varchar(255),
+	tag varchar(255),
+	authorId int(11),
+	publish datetime,
+	readNum int(11),
+	url varchar(255),
+	primary key(blogId),
+	constraint fk_cnblog foreign key (authorId) references cnblog_author(authorId)
+)engine=InnoDB default charset=utf8;
+#创建csdn博主表
+create table if not exists csdn_author(
+	authorId int(11) not null auto_increment primary key,
+	authorName varchar(255),
+	blogNum int(11),
+	fansNum int(11),
+	likeNum int(11),
+	commentNum int(11),
+	levelNum int(11),
+	visitNum int(11),
+	integral int(11),
+	rank int(11)
+)engine=InnoDB default charset=utf8;
+#创建csdn博客表
+create table if not exists csdn_blog(
+	blogId int(11) not null primary key,
+	title varchar(255),
+	readNum int(11),
+	publishTime datetime,
+	tag varchar(255),
+	authorId int(11),
+	constraint fk_csdn foreign key (authorId) references csdn_author(authorId)
+)engine=InnoDB default charset=utf8;
+#创建代理IP表
+create table if not exists ipproxy(
+	id int(11) not null auto_increment primary key,
+	ipAddress varchar(255),
+	port int(11),
+	serverLocate varchar(255),
+	anonymity int(11),
+	type varchar(255)
+)engine=InnoDB default charset=utf8;

@@ -180,9 +180,10 @@ public class DatabaseTool {
 	public static void InsertIntoCnblogBlog(CnblogBlog blog){
 		switch(blog.getFlag()){
 		case CnblogBlog.FLAG_PART:
-			//不存在博文信息才可以完成插入
+			//不存在博客信息才可以完成插入
 			if(!DatabaseTool.existCnblogBlogItem(blog.getBlogId())){
-				InsertIntoCnblogBlog(blog.getUrl(),blog.getBlogId(),blog.getTitle(),blog.getAuthorId(),blog.getPublish());
+				InsertIntoCnblogBlog(blog.getUrl(),blog.getBlogId(),
+				blog.getTitle(),blog.getAuthorId(),blog.getPublish());
 			}break;
 		case CnblogBlog.FLAG_TYPE_TAG:
 			UpdateTypeTagInCnblogBlog(blog.getBlogId(),blog.getType(),blog.getTag());
@@ -276,10 +277,14 @@ public class DatabaseTool {
 		case CnblogAuthor.FLAG_PART_1:
 			//不存在作者信息才能插入
 			if(!DatabaseTool.existCnblogAuthorItem(author.getAuthorId())){
-				InsertIntoCnblogAuthor(author.getAuthorId(), author.getAuthorName(), author.getUrl());
-			}break;
+				InsertIntoCnblogAuthor(author.getAuthorId(), 
+				author.getAuthorName(), author.getUrl());
+			}
+			break;
 		case CnblogAuthor.FLAG_PART_2:
-			UpdateCnblogAuthor(author.getAuthorName(), author.getAuthorNickName(), author.getCreateDate(), author.getFans(), author.getAttention());
+			UpdateCnblogAuthor(author.getAuthorName(), 
+			author.getAuthorNickName(), author.getCreateDate(), 
+			author.getFans(), author.getAttention());
 			break;
 		}
 	}

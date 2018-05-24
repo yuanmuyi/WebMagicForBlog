@@ -54,6 +54,6 @@ public class MySQLPipeLine implements Pipeline {
 		}
 		if(blog!=null){
 			DatabaseTool.InsertIntoCnblogBlog(blog);
-		}	
+		}
 	}
 }

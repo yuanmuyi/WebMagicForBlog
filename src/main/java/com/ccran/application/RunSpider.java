@@ -44,8 +44,9 @@ public class RunSpider {
 		 * Pipeline包括ConsolePipeline以及MySQLPipeLine
 		 * Scheduler使用PriorityScheduler进行基于优先级的调度 初始URL为博客园主页
 		 */
-		Spider.create(new CnblogPageProcesser(SITE_JSON_PATH)).setScheduler(new PriorityScheduler())
-				.addUrl(CNBLOGS_START_URL).addPipeline(new ConsolePipeline()).addPipeline(new MySQLPipeLine()).run();
+		Spider.create(new CnblogPageProcesser(SITE_JSON_PATH)).
+		setScheduler(new PriorityScheduler()).addUrl(CNBLOGS_START_URL)
+		.addPipeline(new ConsolePipeline()).addPipeline(new MySQLPipeLine()).run();
 	}
 
 	/**
@@ -57,15 +58,17 @@ public class RunSpider {
 	 * @version V1.0
 	 */
 	public static void RunIPProxySpider() {
-		Spider.create(new IPProxyProcessor(SITE_JSON_PATH)).addUrl(XICI_IP_PROXY_URL).addPipeline(new ConsolePipeline())
-				.run();
+		Spider.create(new IPProxyProcessor(SITE_JSON_PATH))
+		.addUrl(XICI_IP_PROXY_URL).addPipeline(new ConsolePipeline())
+		.run();
 	}
 
 	public static void RunCSDNSpider() {
 		while (true) {
 			//代理爬取
 			DatabaseTool.clearIPProxyTable();
-			Spider.create(new IPProxyProcessor(SITE_JSON_PATH)).addUrl(XICI_IP_PROXY_URL).run();
+			Spider.create(new IPProxyProcessor(SITE_JSON_PATH))
+			.addUrl(XICI_IP_PROXY_URL).run();
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {

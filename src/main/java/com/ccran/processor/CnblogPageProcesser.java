@@ -22,7 +22,6 @@ import us.codecraft.webmagic.selector.JsonPathSelector;
  */
 public class CnblogPageProcesser extends BasePageProcessor {
 	private static final String START_URL="https://www.cnblogs.com";
-	
 	private static final String LOW_LINK_URL="(https://www.cnblogs.com/[\\s\\S]+)";
 	private static final String MID_LINK_URL="(https://www.cnblogs.com/\\w+)";
 	private static final String HIGH_LINK_URL="(https://www.cnblogs.com/\\w+/p/\\w+.html)";

@@ -30,7 +30,8 @@ public class IPProxyProcessor extends BasePageProcessor {
 	
 	public void process(Page page) {
 		//进行信息提取
-		List<Selectable> sel=page.getHtml().xpath("//table[@id='ip_list']/tbody/tr[@class]").nodes();
+		List<Selectable> sel=page.getHtml()
+				.xpath("//table[@id='ip_list']/tbody/tr[@class]").nodes();
 		for(Selectable s:sel){
 			//获取每一项IP信息
 			List<String> items=s.xpath("//td/text()").all();
@@ -44,7 +45,9 @@ public class IPProxyProcessor extends BasePageProcessor {
 			if(strAnonymity.equals("透明"))
 				anonymity=IPProxyItem.CLARITY;
 			String type=items.get(5);
-			IPProxyItem item=new IPProxyItem(ipAddress, port, serverLocate, anonymity, type);
+			//封装成IPProxyItem，并且插入数据表
+			IPProxyItem item=new IPProxyItem(ipAddress, port, serverLocate, 
+					anonymity, type);
 			DatabaseTool.InsertIntoIPProxy(item);
 		}
 	}
