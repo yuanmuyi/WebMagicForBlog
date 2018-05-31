@@ -19,8 +19,8 @@ import us.codecraft.webmagic.selector.Selectable;
  * @version V1.0
  */
 public class CSDNPageProcessor extends BasePageProcessor {
-	private static final String BLOG_PAGE_REGEX = "([\\s\\S]+blog.csdn.net/(\\w+)/article/details/(\\d+))";
-	private static final String BLOG_LINKS = "([\\s\\S]+blog.csdn.net[\\s\\S]+)";
+	private static final String BLOG_PAGE_REGEX = "(https?://blog.csdn.net/(\\w+)/article/details/(\\d+))";
+	private static final String BLOG_LINKS = "(https?://blog.csdn.net[\\s\\S]+)";
 
 	public CSDNPageProcessor(String path) {
 		super(path);
@@ -29,7 +29,6 @@ public class CSDNPageProcessor extends BasePageProcessor {
 	public void process(Page page) {
 		// 其他内链的添加
 		page.addTargetRequests(page.getHtml().links().regex(BLOG_LINKS).all());
-		// System.out.println(page.getHtml().links().regex(BLOG_LINKS).all());
 		// 博客网页爬取
 		if (page.getUrl().regex(BLOG_PAGE_REGEX).match()) {
 			crawlForBlogPage(page);
@@ -74,11 +73,13 @@ public class CSDNPageProcessor extends BasePageProcessor {
 	private void crwalForAuthor(Page page) {
 		String authorName = page.getUrl().regex(BLOG_PAGE_REGEX, 2).toString();
 		List<Selectable> authorInfoSelList = page.getHtml().
-				xpath("//div[@class='data-info d-flex item-tiling']/dl").nodes();
-		int blogNum = Integer.parseInt(authorInfoSelList.get(0).xpath("//dd/span/text()").toString());
-		int fansNum = Integer.parseInt(authorInfoSelList.get(1).xpath("//dd/span/text()").toString());
-		int likeNum = Integer.parseInt(authorInfoSelList.get(2).xpath("//dd/span/text()").toString());
-		int commentNum = Integer.parseInt(authorInfoSelList.get(3).xpath("//dd/span/text()").toString());
+				xpath("//div[@class='data-info d-flex item-tiling']/dl/@title").nodes();
+		if(authorInfoSelList.isEmpty())
+			return ;
+		int blogNum = Integer.parseInt(authorInfoSelList.get(0).toString());
+		int fansNum = Integer.parseInt(authorInfoSelList.get(1).toString());
+		int likeNum = Integer.parseInt(authorInfoSelList.get(2).toString());
+		int commentNum = Integer.parseInt(authorInfoSelList.get(3).toString());
 		authorInfoSelList = page.getHtml().
 				xpath("//div[@class='grade-box clearfix']/dl").nodes();
 		int level = Integer.parseInt(authorInfoSelList.get(0)
@@ -96,6 +97,7 @@ public class CSDNPageProcessor extends BasePageProcessor {
 	}
 
 	public static void main(String[] args) {
-		Spider.create(new CSDNPageProcessor("site.json")).addUrl("https://blog.csdn.net/").start();
+		Spider.create(new CSDNPageProcessor("site.json"))
+		.addUrl("http://blog.csdn.net").start();
 	}
 }

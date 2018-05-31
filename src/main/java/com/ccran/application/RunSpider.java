@@ -25,8 +25,8 @@ public class RunSpider {
 	private static final String SITE_JSON_PATH = "site.json";
 
 	public static void main(String[] args) {
-		// RunCnblogSpider();
-		// RunIPProxySpider();
+		//RunCnblogSpider();
+		//RunIPProxySpider();
 		RunCSDNSpider();
 	}
 

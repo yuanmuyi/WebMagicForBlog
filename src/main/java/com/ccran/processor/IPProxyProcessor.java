@@ -48,6 +48,7 @@ public class IPProxyProcessor extends BasePageProcessor {
 			//封装成IPProxyItem，并且插入数据表
 			IPProxyItem item=new IPProxyItem(ipAddress, port, serverLocate, 
 					anonymity, type);
+			System.out.println(item);
 			DatabaseTool.InsertIntoIPProxy(item);
 		}
 	}

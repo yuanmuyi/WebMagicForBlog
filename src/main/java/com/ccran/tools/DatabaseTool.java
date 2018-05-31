@@ -179,16 +179,20 @@ public class DatabaseTool {
 	 */
 	public static void InsertIntoCnblogBlog(CnblogBlog blog){
 		switch(blog.getFlag()){
+		//根据标志决定插入或更新操作
 		case CnblogBlog.FLAG_PART:
 			//不存在博客信息才可以完成插入
 			if(!DatabaseTool.existCnblogBlogItem(blog.getBlogId())){
+				//插入基本信息
 				InsertIntoCnblogBlog(blog.getUrl(),blog.getBlogId(),
 				blog.getTitle(),blog.getAuthorId(),blog.getPublish());
 			}break;
 		case CnblogBlog.FLAG_TYPE_TAG:
+			//更新类型标志
 			UpdateTypeTagInCnblogBlog(blog.getBlogId(),blog.getType(),blog.getTag());
 			break;
 		case CnblogBlog.FLAG_READ_NUM:
+			//更新阅读量
 			UpdateReadNumInCnblogBlog(blog.getBlogId(),blog.getReadNum());
 			break;
 		}
@@ -277,11 +281,13 @@ public class DatabaseTool {
 		case CnblogAuthor.FLAG_PART_1:
 			//不存在作者信息才能插入
 			if(!DatabaseTool.existCnblogAuthorItem(author.getAuthorId())){
+				//插入博主id以及主页url
 				InsertIntoCnblogAuthor(author.getAuthorId(), 
 				author.getAuthorName(), author.getUrl());
 			}
 			break;
 		case CnblogAuthor.FLAG_PART_2:
+			//更新博主其他基本信息
 			UpdateCnblogAuthor(author.getAuthorName(), 
 			author.getAuthorNickName(), author.getCreateDate(), 
 			author.getFans(), author.getAttention());
